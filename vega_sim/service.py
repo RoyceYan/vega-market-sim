@@ -500,6 +500,51 @@ class VegaService(ABC):
         )
         self.wait_fn(110)
 
+    def governance_transfer(
+        self,
+        key_name: str,
+        source_type: vega_protos.vega.AccountType,
+        transfer_type: vega_protos.vega.GovernanceTransferType,
+        amount: float,
+        asset: str,
+        fraction_of_balance: float,
+        destination_type: vega_protos.vega.AccountType,
+        source: Optional[str] = None,
+        destination: Optional[str] = None,
+        closing_time: Optional[int] = None,
+        enactment_time: Optional[int] = None,
+        wallet_name: Optional[str] = None,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        gov.propose_transfer(
+            key_name=key_name,
+            wallet=self.wallet,
+            source_type=get_enum(source_type, vega_protos.vega.AccountType),
+            transfer_type=get_enum(
+                transfer_type, vega_protos.governance.GovernanceTransferType
+            ),
+            amount=str(
+                num_to_padded_int(amount, self.data_cache._asset_decimals[asset])
+            ),
+            asset=asset,
+            fraction_of_balance=str(fraction_of_balance),
+            destination_type=get_enum(destination_type, vega_protos.vega.AccountType),
+            source=source,
+            destination=destination,
+            closing_time=closing_time
+            if closing_time is not None
+            else blockchain_time_seconds + 10,
+            enactment_time=enactment_time
+            if enactment_time is not None
+            else blockchain_time_seconds + 20,
+            data_client=self.trading_data_client_v2,
+            time_forward_fn=lambda: self.wait_fn(2),
+            wallet_name=wallet_name,
+        )
+
+        self.wait_fn(110)
+
     def create_simple_market(
         self,
         market_name: str,
@@ -2109,11 +2154,11 @@ class VegaService(ABC):
     def one_off_transfer(
         self,
         from_key_name: str,
-        to_key_name: str,
         from_account_type: vega_protos.vega.AccountType,
         to_account_type: vega_protos.vega.AccountType,
         asset: str,
         amount: float,
+        to_key_name: Optional[str] = None,
         reference: Optional[str] = None,
         from_wallet_name: Optional[str] = None,
         to_wallet_name: Optional[str] = None,
@@ -2155,7 +2200,9 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name),
+            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+            if to_key_name is not None
+            else "0000000000000000000000000000000000000000000000000000000000000000",
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, adp)),

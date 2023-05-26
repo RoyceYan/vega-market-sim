@@ -361,6 +361,61 @@ def propose_network_parameter_change(
     ).proposal.id
 
 
+def propose_transfer(
+    key_name: str,
+    wallet: Wallet,
+    source_type: vega_protos.vega.AccountType,
+    transfer_type: vega_protos.governance.GovernanceTransferType,
+    amount: str,
+    asset: str,
+    fraction_of_balance: str,
+    destination_type: vega_protos.vega.AccountType,
+    source: Optional[str] = None,
+    destination: Optional[str] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    data_client: Optional[vac.VegaTradingDataClientV2] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+    wallet_name: Optional[str] = None,
+):
+    transfer_proposal = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    transfer_proposal.terms.new_transfer.CopyFrom(
+        vega_protos.governance.NewTransfer(
+            changes=vega_protos.governance.NewTransferConfiguration(
+                source_type=source_type,
+                transfer_type=transfer_type,
+                amount=amount,
+                asset=asset,
+                fraction_of_balance=fraction_of_balance,
+                destination_type=destination_type,
+                one_off=vega_protos.governance.OneOffTransfer(
+                    deliver_on=enactment_time + 60
+                ),
+            )
+        )
+    )
+    if source is not None:
+        setattr(transfer_proposal.terms.new_transfer.changes, "source", source)
+    if destination is not None:
+        setattr(
+            transfer_proposal.terms.new_transfer.changes, "destination", destination
+        )
+
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=transfer_proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    ).proposal.id
+
+
 def propose_market_update(
     market_id: str,
     key_name: str,
