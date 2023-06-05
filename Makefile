@@ -70,10 +70,10 @@ build_deps_networks:
 	@mkdir -p ./vega_sim/bin/networks
 	@rsync -av ${EXTERN_DIR}/networks vega_sim/bin/ --exclude ${EXTERN_DIR}/networks/.git
 
-build_proto: pull_deps
+build_proto:
 	@rm -rf ./vega_sim/proto
 	@mkdir ./vega_sim/proto
-	@buf generate extern/vega/protos/sources 
+	@buf generate /Users/wwestgarth/work/vega/protos/sources
 	@GENERATED_DIR=./vega_sim/proto scripts/post-generate.sh
 
 .PHONY: black

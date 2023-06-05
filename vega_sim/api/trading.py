@@ -47,6 +47,7 @@ def submit_order(
     price: Optional[str] = None,
     expires_at: Optional[int] = None,
     pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
+    iceberg_order = None,
     wait: bool = True,
     time_forward_fn: Optional[Callable[[], None]] = None,
     order_ref: Optional[str] = None,
@@ -119,6 +120,7 @@ def submit_order(
         reference=order_ref,
         price=price,
         pegged_order=pegged_order,
+        iceberg_order=iceberg_order,
         reduce_only=reduce_only,
         post_only=post_only,
     )
@@ -517,6 +519,7 @@ def order_submission(
     reference: Optional[str] = None,
     price: Optional[str] = None,
     pegged_order: Optional[Union[vega_protos.PeggedOrder, str]] = None,
+    iceberg_order = None,
     reduce_only: bool = False,
     post_only: bool = False,
 ) -> OrderSubmission:
@@ -593,6 +596,8 @@ def order_submission(
     if pegged_order is not None:
         command.pegged_order.CopyFrom(pegged_order)
 
+    if iceberg_order is not None:
+        command.iceberg_opts.CopyFrom(iceberg_order)
     # Return the created and updated OrderSubmission object
     return command
 

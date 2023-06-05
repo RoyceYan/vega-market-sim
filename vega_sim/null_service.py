@@ -267,6 +267,7 @@ def _popen_process(
     err = open(path.join(dir_root, f"{log_name}.err"), "wb")
     sub_proc = subprocess.Popen(
         popen_args, stdout=out, stderr=err, env=env, close_fds=True
+        #popen_args, env=env, close_fds=True
     )
 
     atexit.register(functools.partial(_terminate_proc, sub_proc, out, err))
@@ -609,12 +610,17 @@ class VegaServiceNull(VegaService):
 
         self._using_all_custom_paths = all(
             [x is not None for x in [vega_path, data_node_path, vega_wallet_path]]
-        )
+        )  
+
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
+        self.vega_path = "/Users/wwestgarth/go2/bin/vega"
+
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
+        self.data_node_path = "/Users/wwestgarth/go2/bin/data-node"
         self.vega_wallet_path = vega_wallet_path or path.join(
             vega_bin_path, "vegawallet"
         )
+        self.vega_wallet_path = "/Users/wwestgarth/go2/bin/vegawallet"
         self.vega_console_path = vega_console_path or path.join(
             vega_bin_path, "console"
         )

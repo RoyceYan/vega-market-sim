@@ -24,8 +24,69 @@ TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 
 wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
 
+
+def iceberg_example_scenario(vega, trader1, trader2, market_id):
+
+
+    # submit some orders to fill the price level
+    submit_buy(trader1, market_id, 10)
+    submit_buy(trader1, market_id, 10)
+
+    # one to watch
+    submit_buy(trader1, 
+               market_id, 50, 
+               ref="special", 
+               iceberg_intial_peak=10,
+               iceberg_minimum_peak=5,
+               )
+
+    submit_buy(trader1, market_id, 20)
+    submit_buy(trader1, market_id, 20)
+
+    input("check special order.")
+
+    # send in an aggressive trade the other way
+    submit_sell(trader2, market_id, 70)
+    input("checking orders after aggressive")
+    input("finished.")
+
+
+
+
+def submit_buy(trader, market_id, volume, ref=None, iceberg_initial_peak=None, iceberg_minimum_peak=None):
+    ib = None
+    if iceberg_initial_peak is not None:
+        ib = {"init", iceberg_initial_peak, "min", iceberg_minimum_peak}
+    vega.submit_order(
+            trading_key=trader,
+            market_id=market_id,
+            time_in_force="TIME_IN_FORCE_GTC",
+            order_type="TYPE_LIMIT",
+            side="SIDE_BUY",
+            volume=volume,
+            price=100,
+            wait=True,
+            order_ref=ref,
+            iceberg_order=ib,
+        )
+
+def submit_sell(trader, market_id, volume, ref=None, iceberg=None):
+    vega.submit_order(
+            trading_key=trader,
+            market_id=market_id,
+            time_in_force="TIME_IN_FORCE_GTC",
+            order_type="TYPE_LIMIT",
+            side="SIDE_SELL",
+            volume=volume,
+            price=100,
+            wait=True,
+            order_ref=ref,
+            iceberg_order=iceberg,
+        )
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+
 
     with VegaServiceNull(
         run_with_console=False,
@@ -112,7 +173,7 @@ if __name__ == "__main__":
             volume=1,
             price=100,
         )
-
+        vega.forward("100s")
         # for i in range(1, 100, 2):
         #     trader = np.random.choice([MM_WALLET.name, MM_WALLET2.name])
 
@@ -136,105 +197,66 @@ if __name__ == "__main__":
         #         price=100 + 0.25 * i,
         #     )
 
-        # for wallet in [MM_WALLET, MM_WALLET2]:
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10,
-        #         price=99.5,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10,
-        #         price=99,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10,
-        #         price=98,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10,
-        #         price=101,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10,
-        #         price=102,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10,
-        #         price=103,
-        #     )
+        for wallet in [MM_WALLET]:
+             vega.submit_order(
+                 trading_key=wallet.name,
+                 market_id=market_id,
+                 time_in_force="TIME_IN_FORCE_GTC",
+                 order_type="TYPE_LIMIT",
+             side="SIDE_BUY",
+                 volume=10,
+                 price=99.5,
+             )
+             vega.submit_order(
+                 trading_key=wallet.name,
+                 market_id=market_id,
+                 time_in_force="TIME_IN_FORCE_GTC",
+                 order_type="TYPE_LIMIT",
+                 side="SIDE_BUY",
+                 volume=10,
+                 price=99,
+             )
+             vega.submit_order(
+                 trading_key=wallet.name,
+                 market_id=market_id,
+                 time_in_force="TIME_IN_FORCE_GTC",
+                 order_type="TYPE_LIMIT",
+                 side="SIDE_BUY",
+                 volume=10,
+                 price=98,
+             )
+             vega.submit_order(
+                 trading_key=wallet.name,
+                 market_id=market_id,
+                 time_in_force="TIME_IN_FORCE_GTC",
+                 order_type="TYPE_LIMIT",
+                 side="SIDE_SELL",
+                 volume=10,
+                 price=101,
+             )
+             vega.submit_order(
+                 trading_key=wallet.name,
+                 market_id=market_id,
+                 time_in_force="TIME_IN_FORCE_GTC",
+                 order_type="TYPE_LIMIT",
+                 side="SIDE_SELL",
+                 volume=10,
+                 price=102,
+             )
+             vega.submit_order(
+                 trading_key=wallet.name,
+                 market_id=market_id,
+                 time_in_force="TIME_IN_FORCE_GTC",
+                 order_type="TYPE_LIMIT",
+                 side="SIDE_SELL",
+                 volume=10,
+                 price=103,
+             )
 
-        to_cancel = vega.submit_order(
-            trading_key=MM_WALLET.name,
-            market_id=market_id,
-            time_in_force="TIME_IN_FORCE_GTC",
-            order_type="TYPE_LIMIT",
-            side="SIDE_SELL",
-            volume=10,
-            price=100.5,
-            wait=True,
-        )
+        iceberg_example_scenario(vega, MM_WALLET.name, MM_WALLET2.name, market_id)
 
-        vega.cancel_order(MM_WALLET.name, market_id, to_cancel)
-
-        vega.submit_order(
-            trading_key=MM_WALLET.name,
-            market_id=market_id,
-            time_in_force="TIME_IN_FORCE_GTC",
-            order_type="TYPE_LIMIT",
-            side="SIDE_BUY",
-            volume=5,
-            price=110.5,
-            wait=True,
-        )
-        vega.submit_simple_liquidity(
-            key_name=MM_WALLET.name,
-            market_id=market_id,
-            commitment_amount=5000,
-            fee=0.002,
-            reference_buy="PEGGED_REFERENCE_MID",
-            reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=10,
-            delta_sell=10,
-            is_amendment=True,
-        )
-
-        margin_levels = vega.margin_levels(MM_WALLET2.name)
-        print(f"Margin levels are: {margin_levels}")
-        vega.forward("10s")
-
-        input("Pausing to observe the market, press Enter to continue.")
         vega.settle_market(
             settlement_key=TERMINATE_WALLET.name,
             settlement_price=100,
             market_id=market_id,
         )
-        input("Press Enter to finish")

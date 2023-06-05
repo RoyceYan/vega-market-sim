@@ -32,11 +32,13 @@ from vega_sim.api.helpers import (
     wait_for_core_catchup,
     wait_for_datanode_sync,
 )
+
 from vega_sim.local_data_cache import LocalDataCache
 from vega_sim.proto.vega.commands.v1.commands_pb2 import (
     OrderAmendment,
     OrderCancellation,
     OrderSubmission,
+    IcebergOpts,
 )
 from vega_sim.proto.vega.governance_pb2 import (
     UpdateFutureProduct,
@@ -651,6 +653,7 @@ class VegaService(ABC):
         price: Optional[float] = None,
         expires_at: Optional[float] = None,
         pegged_order: Optional[PeggedOrder] = None,
+        iceberg_order = None,
         wait: bool = True,
         order_ref: Optional[str] = None,
         trading_wallet: Optional[str] = None,
@@ -753,6 +756,20 @@ class VegaService(ABC):
                     ),
                 )
                 if pegged_order is not None
+                else None
+            ),
+            iceberg_order= (
+                IcebergOpts(
+                    initial_peak_size = num_to_padded_int(
+                                        iceberg_order["init"],
+                                        self.market_pos_decimals[market_id],
+                                    ),
+                    minimum_peak_size = num_to_padded_int(
+                                        iceberg_order["min"],
+                                        self.market_pos_decimals[market_id],
+                                    ),
+                )
+                if iceberg_order is not None
                 else None
             ),
             wait=wait,
