@@ -36,7 +36,7 @@ def iceberg_example_scenario(vega, trader1, trader2, market_id):
     submit_buy(trader1, 
                market_id, 50, 
                ref="special", 
-               iceberg_intial_peak=10,
+               iceberg_initial_peak=10,
                iceberg_minimum_peak=5,
                )
 
@@ -56,7 +56,7 @@ def iceberg_example_scenario(vega, trader1, trader2, market_id):
 def submit_buy(trader, market_id, volume, ref=None, iceberg_initial_peak=None, iceberg_minimum_peak=None):
     ib = None
     if iceberg_initial_peak is not None:
-        ib = {"init", iceberg_initial_peak, "min", iceberg_minimum_peak}
+        ib = {"init": iceberg_initial_peak, "min": iceberg_minimum_peak}
     vega.submit_order(
             trading_key=trader,
             market_id=market_id,
