@@ -29,24 +29,27 @@ def iceberg_example_scenario(vega, trader1, trader2, market_id):
 
 
     # submit some orders to fill the price level
+    submit_buy(trader1, market_id, 50, ref="special",iceberg_initial_peak=10,
+               iceberg_minimum_peak=5)
     submit_buy(trader1, market_id, 10)
     submit_buy(trader1, market_id, 10)
+    submit_buy(trader1, market_id, 20)
+    submit_buy(trader1, market_id, 20)
 
     # one to watch
-    submit_buy(trader1, 
-               market_id, 50, 
-               ref="special", 
-               iceberg_initial_peak=10,
-               iceberg_minimum_peak=5,
-               )
+    #submit_buy(trader1, 
+    #           market_id, 50, 
+    #           ref="special", 
+    #           iceberg_initial_peak=10,
+    #           iceberg_minimum_peak=5,
+    #           )
 
-    submit_buy(trader1, market_id, 20)
-    submit_buy(trader1, market_id, 20)
-
-    input("check special order.")
+    input("check orders")
 
     # send in an aggressive trade the other way
-    submit_sell(trader2, market_id, 70)
+    submit_sell(trader2, market_id, 50)
+
+
     input("checking orders after aggressive")
     input("finished.")
 
