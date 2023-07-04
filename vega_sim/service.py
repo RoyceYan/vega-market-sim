@@ -517,7 +517,7 @@ class VegaService(ABC):
     ):
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
-        gov.propose_transfer(
+        proposal_id = gov.propose_transfer(
             key_name=key_name,
             wallet=self.wallet,
             source_type=get_enum(source_type, vega_protos.vega.AccountType),
@@ -542,7 +542,13 @@ class VegaService(ABC):
             time_forward_fn=lambda: self.wait_fn(2),
             wallet_name=wallet_name,
         )
-
+        self.wait_fn(1)
+        gov.approve_proposal(
+            proposal_id=proposal_id,
+            wallet_name=wallet_name,
+            wallet=self.wallet,
+            key_name=key_name,
+        )
         self.wait_fn(110)
 
     def create_simple_market(

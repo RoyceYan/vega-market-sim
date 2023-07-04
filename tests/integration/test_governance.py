@@ -10,6 +10,8 @@ PARTY_A = WalletConfig(name="party_a", passphrase="pass")
 PARTY_B = WalletConfig(name="party_b", passphrase="pass")
 
 pytest.mark.integration
+
+
 def test_governance_transfer(vega_service: vega_service):
     vega: VegaServiceNull = vega_service
 
@@ -56,6 +58,8 @@ def test_governance_transfer(vega_service: vega_service):
         destination_type="ACCOUNT_TYPE_GENERAL",
         destination=party_a_public_key,
     )
+    vega.wait_fn(5)
+    vega.wait_for_total_catchup()
 
     # Get and check party account balance
     party_a_account_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
